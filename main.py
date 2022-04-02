@@ -3,6 +3,7 @@ import cv2
 from PIL import ImageGrab
 import pyautogui
 import win32gui
+from mss import mss
 
 ## get video
 def screen_record(window_title=None):
@@ -13,7 +14,9 @@ def screen_record(window_title=None):
 			x, y, x1, y1 = win32gui.GetClientRect(hwnd)
 			x, y = win32gui.ClientToScreen(hwnd, (x, y))
 			x1, y1 = win32gui.ClientToScreen(hwnd, (x1 - x, y1 - y))
-			im = pyautogui.screenshot(region = (x, y, x1, y1))
+			#im = pyautogui.screenshot(region = (x, y, x1, y1))
+			sct=mss()
+			im=sct.grab((x, y, x1, y1))
 			return im
 		else:
 			print('Window not found!')
@@ -22,8 +25,11 @@ def screen_record(window_title=None):
 		return im
 
 
+while True:
 
+	im = screen_record('Grand Theft Auto V')
+	cv2.imshow('screen', np.array(im))
 
-im = screen_record('Grand Theft Auto V')
-if im:
-    im.show()
+	if (cv2.waitKey(1) & 0xFF) == ord('q'):
+		cv2.destroyAllWindows()
+		break
