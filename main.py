@@ -1,7 +1,9 @@
 import cv2
 import numpy as np
+import pygame
 import win32gui
 from mss import mss
+
 
 def get_window_location(window_title = None):
 	if window_title:
@@ -17,13 +19,15 @@ def get_window_location(window_title = None):
 		return x, y, x1, y1
 
 
-## get video
-def screen_record(x, y, x1, y1):
+# get video
+def screen_record(xsr, ysr, x1sr, y1sr):
 	sct = mss()
-	im = np.array(sct.grab((x, y, x1, y1)))
-	return im
+	image = np.array(sct.grab((xsr, ysr, x1sr, y1sr)))
+	return image
+
+
 def image_processing(im):
-	## find yellow in an image
+	# find yellow in an image
 	hsv = cv2.cvtColor(im, cv2.COLOR_BGR2HSV)
 	gray = cv2.cvtColor(im, cv2.COLOR_BGR2GRAY)
 	# Threshold of yellow in HSV space
@@ -42,16 +46,24 @@ def image_processing(im):
 	# preparing the mask to overlay
 	maskgr = cv2.inRange(gray, 100, 255)
 	im = cv2.bitwise_and(im, im, mask = maskgr)
-
 	return im, yellow_im, white_im
-
+########################################################################################################################
+#
+# Start Runtime
+#
+########################################################################################################################
+#initialize
+pygame.init()
 x, y, x1, y1 = get_window_location('Grand Theft Auto V')
-#get image
+
+# Main Loop
 while True:
 	im = screen_record(x, y, x1, y1)
 	# image processing
 	im, yellow_im, white_im=image_processing(im)
+	#shows the image loaded into imshow
 	cv2.imshow('screen', white_im)
+	# this will break the loop when 'q' is pressed
 	if (cv2.waitKey(1) & 0xFF) == ord('q'):
 		cv2.destroyAllWindows()
 		break
