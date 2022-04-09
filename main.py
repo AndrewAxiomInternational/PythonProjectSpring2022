@@ -36,9 +36,9 @@ def get_window_location(window_title = None):
 			x_int, y_int, x1_int, y1_int = win32gui.GetClientRect(hwnd)
 			x_int, y_int = win32gui.ClientToScreen(hwnd, (x_int, y_int))
 			x1_int, y1_int = win32gui.ClientToScreen(hwnd, (x1_int - x_int, y1_int - y_int))
+			return x_int, y_int, x1_int, y1_int
 		else:
 			print('Window not found!')
-		return x_int, y_int, x1_int, y1_int
 
 
 # get video
@@ -96,7 +96,7 @@ if __name__ == '__main__':
 		# image processing
 		im, yellow_im, white_im = image_processing(im)
 		# shows the image loaded into imshow
-		cv2.imshow('screen', white_im)
+		cv2.imshow('screen', im)
 		# this will break the loop when 'q' is pressed
 		if (cv2.waitKey(1) & 0xFF) == ord('q'):
 			cv2.destroyAllWindows()
@@ -111,3 +111,4 @@ if __name__ == '__main__':
 		#gamepad.right_joystick_float(x_value_float = -1.0, y_value_float = 1.0)# -1 to 1
 		# controller update
 		gamepad.update()
+
