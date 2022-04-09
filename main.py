@@ -1,8 +1,4 @@
 import cv2
-
-
-import cv2
-import numpy as np
 import numpy as np
 import win32gui
 from mss import mss
@@ -55,7 +51,7 @@ while True:
 	im = screen_record(x, y, x1, y1)
 	# image processing
 	im, yellow_im, white_im=image_processing(im)
-	cv2.imshow('screen', white*_im)
+	cv2.imshow('screen', white_im)
 	if (cv2.waitKey(1) & 0xFF) == ord('q'):
 		cv2.destroyAllWindows()
 		break
