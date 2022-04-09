@@ -1,32 +1,31 @@
-import ctypes.wintypes
-import os
 import time
+from enum import IntFlag
 
-import cv2
 import numpy as np
+import vgamepad as vg
 import win32gui
 from mss import mss
 
 
-class XInputGamepad(ctypes.Structure):
-	_fields_ = [
-		('wButtons', ctypes.wintypes.WORD),
-		('bLeftTrigger', ctypes.wintypes.BYTE),
-		('bRightTrigger', ctypes.wintypes.BYTE),
-		('sThumbLX', ctypes.wintypes.SHORT),
-		('sThumbLY', ctypes.wintypes.SHORT),
-		('sThumbRX', ctypes.wintypes.SHORT),
-		('sThumbRY', ctypes.wintypes.SHORT)
-	]
-
-
-class XInputState(ctypes.Structure):
-	_fields_ = [('dwPacketNumber', ctypes.wintypes.DWORD),('Gamepad', XInputGamepad),]
-
-
-class XInputVibration(ctypes.Structure):
-	_fields_ = [('wLeftMotorSpeed', ctypes.wintypes.WORD),('wRightMotorSpeed', ctypes.wintypes.WORD)]
-
+class XUSB_BUTTON(IntFlag):
+    """
+    Possible XUSB report buttons.
+    """
+    XUSB_GAMEPAD_DPAD_UP = 0x0001
+    XUSB_GAMEPAD_DPAD_DOWN = 0x0002
+    XUSB_GAMEPAD_DPAD_LEFT = 0x0004
+    XUSB_GAMEPAD_DPAD_RIGHT = 0x0008
+    XUSB_GAMEPAD_START = 0x0010
+    XUSB_GAMEPAD_BACK = 0x0020
+    XUSB_GAMEPAD_LEFT_THUMB = 0x0040
+    XUSB_GAMEPAD_RIGHT_THUMB = 0x0080
+    XUSB_GAMEPAD_LEFT_SHOULDER = 0x0100
+    XUSB_GAMEPAD_RIGHT_SHOULDER = 0x0200
+    XUSB_GAMEPAD_GUIDE = 0x0400
+    XUSB_GAMEPAD_A = 0x1000
+    XUSB_GAMEPAD_B = 0x2000
+    XUSB_GAMEPAD_X = 0x4000
+    XUSB_GAMEPAD_Y = 0x8000
 
 def get_window_location(window_title = None):
 	if window_title:
@@ -78,28 +77,36 @@ def image_processing(im_to_be_processed):
 ########################################################################################################################
 # initialize
 if __name__ == '__main__':
-	api = ctypes.windll.xinput1_4
-	state = XInputState()
-	gamepad_number = 0
+	gamepad = vg.VX360Gamepad()
 
+	# press a button to wake the device up
+	gamepad.press_button(button = vg.XUSB_BUTTON.XUSB_GAMEPAD_A)
+	gamepad.update()
+	time.sleep(0.5)
+	gamepad.release_button(button = vg.XUSB_BUTTON.XUSB_GAMEPAD_A)
+	gamepad.update()
+	time.sleep(0.5)
+
+	x, y, x1, y1 = get_window_location('Grand Theft Auto V')
+
+	# Main Loop
 	while True:
-		api.XInputGetState(
-				ctypes.wintypes.WORD(gamepad_number),
-				ctypes.pointer(state)
-		)
-		print(state.dwPacketNumber)
-		time.sleep(0.5)
-		os.system('cls')
-x, y, x1, y1 = get_window_location('Grand Theft Auto V')
+		im = screen_record(x, y, x1, y1)
+		# image processing
+		im, yellow_im, white_im = image_processing(im)
+		# shows the image loaded into imshow
+		cv2.imshow('screen', white_im)
+		# this will break the loop when 'q' is pressed
+		if (cv2.waitKey(1) & 0xFF) == ord('q'):
+			cv2.destroyAllWindows()
+			break
 
-# Main Loop
-while True:
-	im = screen_record(x, y, x1, y1)
-	# image processing
-	im, yellow_im, white_im = image_processing(im)
-	# shows the image loaded into imshow
-	cv2.imshow('screen', white_im)
-	# this will break the loop when 'q' is pressed
-	if (cv2.waitKey(1) & 0xFF) == ord('q'):
-		cv2.destroyAllWindows()
-		break
+		# POSSIBLE CONTROLLER INPUTS
+		#gamepad.press_button(button = vg.XUSB_BUTTON.XUSB_GAMEPAD_A)
+		#gamepad.release_button(button = vg.XUSB_BUTTON.XUSB_GAMEPAD_A)
+		#gamepad.left_trigger_float(value_float = 0.5)
+		#gamepad.right_trigger_float(value_float = 0.5)
+		#gamepad.left_joystick_float(x_value_float = 0.0, y_value_float = 0.2)
+		#gamepad.right_joystick_float(x_value_float = -1.0, y_value_float = 1.0)
+		# controller update
+		gamepad.update()
