@@ -1,6 +1,7 @@
 import time
 from enum import IntFlag
 
+import cv2
 import numpy as np
 import vgamepad as vg
 import win32gui
