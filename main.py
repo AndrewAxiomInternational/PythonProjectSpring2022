@@ -4,47 +4,52 @@ from enum import IntFlag
 import cv2
 import numpy as np
 import vgamepad as vg
-import win32gui
+# import win32gui
 from mss import mss
+from win32gui import FindWindow, GetWindowRect
 
 
 class XUSB_BUTTON(IntFlag):
-    """
+	"""
     Possible XUSB report buttons.
     """
-    XUSB_GAMEPAD_DPAD_UP = 0x0001 #phone up
-    XUSB_GAMEPAD_DPAD_DOWN = 0x0002 # phone down
-    XUSB_GAMEPAD_DPAD_LEFT = 0x0004 # Phone left
-    XUSB_GAMEPAD_DPAD_RIGHT = 0x0008 #phone right
-    XUSB_GAMEPAD_START = 0x0010 # pause menu
-    XUSB_GAMEPAD_BACK = 0x0020 # interaction menu
-    XUSB_GAMEPAD_LEFT_THUMB = 0x0040 # horn
-    XUSB_GAMEPAD_RIGHT_THUMB = 0x0080 # look behind
-    XUSB_GAMEPAD_LEFT_SHOULDER = 0x0100 # aim weapon
-    XUSB_GAMEPAD_RIGHT_SHOULDER = 0x0200 # handbrake
-    XUSB_GAMEPAD_GUIDE = 0x0400 #
-    XUSB_GAMEPAD_A = 0x1000 # duck
-    XUSB_GAMEPAD_B = 0x2000 #
-    XUSB_GAMEPAD_X = 0x4000 #
-    XUSB_GAMEPAD_Y = 0x8000 # exit vehicle
+	XUSB_GAMEPAD_DPAD_UP = 0x0001  # phone up
+	XUSB_GAMEPAD_DPAD_DOWN = 0x0002  # phone down
+	XUSB_GAMEPAD_DPAD_LEFT = 0x0004  # Phone left
+	XUSB_GAMEPAD_DPAD_RIGHT = 0x0008  # phone right
+	XUSB_GAMEPAD_START = 0x0010  # pause menu
+	XUSB_GAMEPAD_BACK = 0x0020  # interaction menu
+	XUSB_GAMEPAD_LEFT_THUMB = 0x0040  # horn
+	XUSB_GAMEPAD_RIGHT_THUMB = 0x0080  # look behind
+	XUSB_GAMEPAD_LEFT_SHOULDER = 0x0100  # aim weapon
+	XUSB_GAMEPAD_RIGHT_SHOULDER = 0x0200  # handbrake
+	XUSB_GAMEPAD_GUIDE = 0x0400  #
+	XUSB_GAMEPAD_A = 0x1000  # duck
+	XUSB_GAMEPAD_B = 0x2000  #
+	XUSB_GAMEPAD_X = 0x4000  #
+	XUSB_GAMEPAD_Y = 0x8000  # exit vehicle
+
 
 def get_window_location(window_title = None):
-	if window_title:
-		hwnd = win32gui.FindWindow(None, window_title)
-		if hwnd:
-			win32gui.SetForegroundWindow(hwnd)
-			x_int, y_int, x1_int, y1_int = win32gui.GetClientRect(hwnd)
-			x_int, y_int = win32gui.ClientToScreen(hwnd, (x_int, y_int))
-			x1_int, y1_int = win32gui.ClientToScreen(hwnd, (x1_int - x_int, y1_int - y_int))
-			return x_int, y_int, x1_int, y1_int
-		else:
-			print('Window not found!')
+	#if window_title:
+		#hwnd = win32gui.FindWindow(None, window_title)
+		#if hwnd:
+		#	win32gui.SetForegroundWindow(hwnd)
+		#	x_int, y_int, x1_int, y1_int = win32gui.GetClientRect(hwnd)
+		#	x_int, y_int = win32gui.ClientToScreen(hwnd, (x_int, y_int))
+		#	x1_int, y1_int = win32gui.ClientToScreen(hwnd, (x1_int - x_int, y1_int - y_int))
+		#	return x_int, y_int, x1_int, y1_int
+		#else:
+			#print('Window not found!')
+	window_handle = FindWindow(None, window_title)
+	window_rect = GetWindowRect(window_handle)
+	return window_rect
 
 
 # get video
-def screen_record(xsr, ysr, x1sr, y1sr):
+def screen_record(image_coordinates):
 	sct = mss()
-	image = np.array(sct.grab((xsr, ysr, x1sr, y1sr)))
+	image = np.array(sct.grab(image_coordinates))
 	return image
 
 
@@ -88,11 +93,10 @@ if __name__ == '__main__':
 	gamepad.update()
 	time.sleep(0.5)
 
-	x, y, x1, y1 = get_window_location('Grand Theft Auto V')
-
+	image_rectangle = get_window_location('Grand Theft Auto V')
 	# Main Loop
 	while True:
-		im = screen_record(x, y, x1, y1)
+		im = screen_record(image_rectangle)
 		# image processing
 		im, yellow_im, white_im = image_processing(im)
 		# shows the image loaded into imshow
@@ -103,12 +107,11 @@ if __name__ == '__main__':
 			break
 
 		# POSSIBLE CONTROLLER INPUTS
-		#gamepad.press_button(button = vg.XUSB_BUTTON.XUSB_GAMEPAD_A) # button list in XUSB_BUTTON
-		#gamepad.release_button(button = vg.XUSB_BUTTON.XUSB_GAMEPAD_A) # button list in XUSB_BUTTON
-		#gamepad.left_trigger_float(value_float = 0.5)# 0 to 1
-		#gamepad.right_trigger_float(value_float = 0.5) # 0 to 1
-		#gamepad.left_joystick_float(x_value_float = 0.0, y_value_float = 0.2) # -1 to 1
-		#gamepad.right_joystick_float(x_value_float = -1.0, y_value_float = 1.0)# -1 to 1
+		# gamepad.press_button(button = vg.XUSB_BUTTON.XUSB_GAMEPAD_A) # button list in XUSB_BUTTON
+		# gamepad.release_button(button = vg.XUSB_BUTTON.XUSB_GAMEPAD_A) # button list in XUSB_BUTTON
+		# gamepad.left_trigger_float(value_float = 0.5)# 0 to 1
+		# gamepad.right_trigger_float(value_float = 0.5) # 0 to 1
+		# gamepad.left_joystick_float(x_value_float = 0.0, y_value_float = 0.2) # -1 to 1
+		# gamepad.right_joystick_float(x_value_float = -1.0, y_value_float = 1.0)# -1 to 1
 		# controller update
 		gamepad.update()
-
