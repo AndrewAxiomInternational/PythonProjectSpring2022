@@ -40,21 +40,21 @@ def get_window_location(window_title = None):
 def screen_record(image_coordinates):
 	sct = mss()
 	image = np.array(sct.grab(image_coordinates))
-	vertices = np.array([[0, image_coordinates[3]], [0, 0.5 * image_coordinates[3]], [0.5 * image_coordinates[2] - 200, 0.5 * image_coordinates[3]], [0.5 * image_coordinates[2] - 200, 0.75 * image_coordinates[3]], [0.5 * image_coordinates[2] + 200, 0.75 * image_coordinates[3]], [0.5 * image_coordinates[2] + 200, 0.5 * image_coordinates[3]], [image_coordinates[2] - 200, 0.5 * image_coordinates[3]], [image_coordinates[2] - 200, image_coordinates[3]], ], np.int32)
-	print(vertices)
-	image = roi(image, [vertices])
+	#vertices = np.array([[0, image_coordinates[3]], [0, 0.5 * image_coordinates[3]], [0.5 * image_coordinates[2] - 200, 0.5 * image_coordinates[3]], [0.5 * image_coordinates[2] - 200, 0.75 * image_coordinates[3]], [0.5 * image_coordinates[2] + 200, 0.75 * image_coordinates[3]], [0.5 * image_coordinates[2] + 200, 0.5 * image_coordinates[3]], [image_coordinates[2] - 200, 0.5 * image_coordinates[3]], [image_coordinates[2] - 200, image_coordinates[3]], ], np.int32)
+	#print(vertices)
+	#image = roi(image, [vertices])
 	return image
 
 
 def roi(img, vertices):
 	# blank mask:
 	mask = np.zeros_like(img)
-	print(mask.shape)
+	#print(mask.shape)
 	# fill the mask
 	cv2.fillPoly(mask, vertices, 255)
 	# now only show the area that is the mask
 	masked = cv2.bitwise_and(img, mask)
-	cv2.imshow('screen', masked)
+	#                                                                               cv2.imshow('screen', masked)
 	return masked
 
 
@@ -63,21 +63,21 @@ def image_processing(im_to_be_processed):
 	hsv = cv2.cvtColor(im_to_be_processed, cv2.COLOR_BGR2HSV)
 	gray = cv2.cvtColor(im_to_be_processed, cv2.COLOR_BGR2GRAY)
 	# Threshold of yellow in HSV space
-	lower_yellow = np.array([20, 100, 100])
-	upper_yellow = np.array([30, 255, 255])
+	lower_yellow = np.array([0, 0, 200])
+	upper_yellow = np.array([200, 200, 255])
 	# preparing the mask to overlay
 	masky = cv2.inRange(hsv, lower_yellow, upper_yellow)
 	yellow_im = cv2.bitwise_and(im_to_be_processed, im_to_be_processed, mask = masky)
 	## find white in an image
-	lower_white = np.array([0, 0, 168], dtype = np.uint8)
-	upper_white = np.array([172, 111, 255], dtype = np.uint8)
+	lower_white = np.array([0, 0, 0], dtype = np.uint8)
+	upper_white = np.array([30, 30, 255], dtype = np.uint8)
 	# preparing the mask to overlay
 	maskw = cv2.inRange(hsv, lower_white, upper_white)
 	white_im = cv2.bitwise_and(im_to_be_processed, im_to_be_processed, mask = maskw)
 	## look for gray or brown (dirt road surfaces)
 	# preparing the mask to overlay
-	maskgr = cv2.inRange(gray, 100, 255)
-	im = cv2.bitwise_and(im_to_be_processed, im_to_be_processed, mask = maskgr)
+	canny = cv2.Canny(gray, threshold1 = 200, threshold2 = 600)
+	im = cv2.bitwise_or(yellow_im, white_im ,  mask = None) #canny,
 	return im, yellow_im, white_im
 
 
@@ -97,7 +97,7 @@ if __name__ == '__main__':
 		# image processing
 		im, yellow_im, white_im = image_processing(im)
 		# shows the image loaded into imshow
-		#cv2.imshow('screen', im)
+		cv2.imshow('screen', im)
 		# this will break the loop when 'q' is pressed
 		if (cv2.waitKey(1) & 0xFF) == ord('q'):
 			cv2.destroyAllWindows()
