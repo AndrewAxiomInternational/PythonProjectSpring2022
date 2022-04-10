@@ -77,8 +77,8 @@ def image_processing(im_to_be_processed):
 	## look for gray or brown (dirt road surfaces)
 	# preparing the mask to overlay
 	canny = cv2.Canny(gray, threshold1 = 200, threshold2 = 600)
-	im = cv2.bitwise_or(yellow_im, white_im ,  mask = None) #canny,
-	return im, yellow_im, white_im
+	im = cv2.bitwise_or(yellow_im, white_im,  mask = None) #canny,
+	return im
 
 
 ########################################################################################################################
@@ -95,7 +95,7 @@ if __name__ == '__main__':
 	while True:
 		im = screen_record(image_rectangle)
 		# image processing
-		im, yellow_im, white_im = image_processing(im)
+		im = image_processing(im)
 		# shows the image loaded into imshow
 		cv2.imshow('screen', im)
 		# this will break the loop when 'q' is pressed
