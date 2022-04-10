@@ -31,16 +31,6 @@ class XUSB_BUTTON(IntFlag):
 
 
 def get_window_location(window_title = None):
-	#if window_title:
-		#hwnd = win32gui.FindWindow(None, window_title)
-		#if hwnd:
-		#	win32gui.SetForegroundWindow(hwnd)
-		#	x_int, y_int, x1_int, y1_int = win32gui.GetClientRect(hwnd)
-		#	x_int, y_int = win32gui.ClientToScreen(hwnd, (x_int, y_int))
-		#	x1_int, y1_int = win32gui.ClientToScreen(hwnd, (x1_int - x_int, y1_int - y_int))
-		#	return x_int, y_int, x1_int, y1_int
-		#else:
-			#print('Window not found!')
 	window_handle = FindWindow(None, window_title)
 	window_rect = GetWindowRect(window_handle)
 	return window_rect
