@@ -90,14 +90,6 @@ def image_processing(im_to_be_processed):
 if __name__ == '__main__':
 	gamepad = vg.VX360Gamepad()
 
-	# press a button to wake the device up
-	#gamepad.press_button(button = vg.XUSB_BUTTON.XUSB_GAMEPAD_A)
-	#gamepad.update()
-	#time.sleep(0.5)
-	#gamepad.release_button(button = vg.XUSB_BUTTON.XUSB_GAMEPAD_A)
-	#gamepad.update()
-	#time.sleep(0.5)
-
 	image_rectangle = get_window_location('Grand Theft Auto V')
 	# Main Loop
 	while True:
