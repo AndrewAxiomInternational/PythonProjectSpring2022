@@ -40,9 +40,9 @@ def get_window_location(window_title = None):
 def screen_record(image_coordinates):
 	sct = mss()
 	image = np.array(sct.grab(image_coordinates))
-	#vertices = np.array([[0, image_coordinates[3]], [0, 0.5 * image_coordinates[3]], [0.5 * image_coordinates[2] - 200, 0.5 * image_coordinates[3]], [0.5 * image_coordinates[2] - 200, 0.75 * image_coordinates[3]], [0.5 * image_coordinates[2] + 200, 0.75 * image_coordinates[3]], [0.5 * image_coordinates[2] + 200, 0.5 * image_coordinates[3]], [image_coordinates[2] - 200, 0.5 * image_coordinates[3]], [image_coordinates[2] - 200, image_coordinates[3]], ], np.int32)
-	#print(vertices)
-	#image = roi(image, [vertices])
+	vertices = np.array([[0, image_coordinates[3]], [0, 0.5 * image_coordinates[3]], [0.5 * image_coordinates[2] - 200, 0.5 * image_coordinates[3]], [0.5 * image_coordinates[2] - 200, 0.75 * image_coordinates[3]], [0.5 * image_coordinates[2] + 200, 0.75 * image_coordinates[3]], [0.5 * image_coordinates[2] + 200, 0.5 * image_coordinates[3]], [image_coordinates[2] - 200, 0.5 * image_coordinates[3]], [image_coordinates[2] - 200, image_coordinates[3]], ], np.int32)
+	print(vertices)
+	image = roi(image, [vertices])
 	return image
 
 
@@ -57,14 +57,36 @@ def roi(img, vertices):
 	#                                                                               cv2.imshow('screen', masked)
 	return masked
 
+def hough_lines(image):
+	"""
+    `image` should be the output of a Canny transform.
+
+    Returns hough lines (not the image with lines)
+    """
+	return cv2.HoughLinesP(image, rho=1, theta=np.pi/180, threshold=100, minLineLength=20, maxLineGap=15)
+
+def draw_lines(image, lines, color=[255, 0, 0], thickness=2, make_copy=True):
+    # the lines returned by cv2.HoughLinesP has the shape (-1, 1, 4)
+	try:
+		if make_copy:
+			image = np.copy(image)  # don't want to modify the original
+		for line in lines:
+			for x1, y1, x2, y2 in line:
+				cv2.line(image, (x1, y1), (x2, y2), color, thickness)
+		return image
+	except:
+		return image
+
 
 def image_processing(im_to_be_processed):
 	# find yellow in an image
 	hsv = cv2.cvtColor(im_to_be_processed, cv2.COLOR_BGR2HSV)
 	gray = cv2.cvtColor(im_to_be_processed, cv2.COLOR_BGR2GRAY)
 	# Threshold of yellow in HSV space
-	lower_yellow = np.array([0, 0, 200])
-	upper_yellow = np.array([200, 200, 255])
+	# lower_yellow = np.array([0, 0, 200])
+	# upper_yellow = np.array([200, 200, 255])
+	lower_yellow = np.array([20, 100, 100])
+	upper_yellow = np.array([30, 255, 255])
 	# preparing the mask to overlay
 	masky = cv2.inRange(hsv, lower_yellow, upper_yellow)
 	yellow_im = cv2.bitwise_and(im_to_be_processed, im_to_be_processed, mask = masky)
@@ -73,11 +95,17 @@ def image_processing(im_to_be_processed):
 	upper_white = np.array([30, 30, 255], dtype = np.uint8)
 	# preparing the mask to overlay
 	maskw = cv2.inRange(hsv, lower_white, upper_white)
-	white_im = cv2.bitwise_and(im_to_be_processed, im_to_be_processed, mask = maskw)
+	mask = cv2.bitwise_or(maskw, masky)
+	im = cv2.cvtColor(cv2.bitwise_and(im_to_be_processed, im_to_be_processed, mask=mask),cv2.COLOR_RGB2GRAY)
+	im = cv2.GaussianBlur(im, (5, 5), 0)
+	im = cv2.Canny(im, threshold1=200, threshold2=300)
+	im = draw_lines(im, hough_lines(im))
+
+	#white_im = cv2.bitwise_and(im_to_be_processed, im_to_be_processed, mask = maskw)
 	## look for gray or brown (dirt road surfaces)
 	# preparing the mask to overlay
-	canny = cv2.Canny(gray, threshold1 = 200, threshold2 = 600)
-	im = cv2.bitwise_or(yellow_im, white_im,  mask = None) #canny,
+	#canny = cv2.Canny(gray, threshold1 = 200, threshold2 = 600)
+	#im = cv2.bitwise_or(yellow_im, white_im,  mask = None) #canny,
 	return im
 
 
@@ -94,10 +122,12 @@ if __name__ == '__main__':
 	# Main Loop
 	while True:
 		im = screen_record(image_rectangle)
+		original_image = im.copy()
 		# image processing
 		im = image_processing(im)
 		# shows the image loaded into imshow
 		cv2.imshow('screen', im)
+		#cv2.imshow('original', draw_lines(original_image, hough_lines(im)))
 		# this will break the loop when 'q' is pressed
 		if (cv2.waitKey(1) & 0xFF) == ord('q'):
 			cv2.destroyAllWindows()
