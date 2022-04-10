@@ -1,4 +1,3 @@
-import time
 from enum import IntFlag
 
 import cv2
@@ -33,6 +32,7 @@ class XUSB_BUTTON(IntFlag):
 def get_window_location(window_title = None):
 	window_handle = FindWindow(None, window_title)
 	window_rect = GetWindowRect(window_handle)
+	print(window_rect)
 	return window_rect
 
 
@@ -40,7 +40,22 @@ def get_window_location(window_title = None):
 def screen_record(image_coordinates):
 	sct = mss()
 	image = np.array(sct.grab(image_coordinates))
+	vertices = np.array([[0, image_coordinates[3]], [0, 0.5 * image_coordinates[3]], [0.5 * image_coordinates[2] - 200, 0.5 * image_coordinates[3]], [0.5 * image_coordinates[2] - 200, 0.75 * image_coordinates[3]], [0.5 * image_coordinates[2] + 200, 0.75 * image_coordinates[3]], [0.5 * image_coordinates[2] + 200, 0.5 * image_coordinates[3]], [image_coordinates[2] - 200, 0.5 * image_coordinates[3]], [image_coordinates[2] - 200, image_coordinates[3]], ], np.int32)
+	print(vertices)
+	image = roi(image, [vertices])
 	return image
+
+
+def roi(img, vertices):
+	# blank mask:
+	mask = np.zeros_like(img)
+	print(mask.shape)
+	# fill the mask
+	cv2.fillPoly(mask, vertices, 255)
+	# now only show the area that is the mask
+	masked = cv2.bitwise_and(img, mask)
+	cv2.imshow('screen', masked)
+	return masked
 
 
 def image_processing(im_to_be_processed):
@@ -76,12 +91,12 @@ if __name__ == '__main__':
 	gamepad = vg.VX360Gamepad()
 
 	# press a button to wake the device up
-	gamepad.press_button(button = vg.XUSB_BUTTON.XUSB_GAMEPAD_A)
-	gamepad.update()
-	time.sleep(0.5)
-	gamepad.release_button(button = vg.XUSB_BUTTON.XUSB_GAMEPAD_A)
-	gamepad.update()
-	time.sleep(0.5)
+	#gamepad.press_button(button = vg.XUSB_BUTTON.XUSB_GAMEPAD_A)
+	#gamepad.update()
+	#time.sleep(0.5)
+	#gamepad.release_button(button = vg.XUSB_BUTTON.XUSB_GAMEPAD_A)
+	#gamepad.update()
+	#time.sleep(0.5)
 
 	image_rectangle = get_window_location('Grand Theft Auto V')
 	# Main Loop
@@ -90,7 +105,7 @@ if __name__ == '__main__':
 		# image processing
 		im, yellow_im, white_im = image_processing(im)
 		# shows the image loaded into imshow
-		cv2.imshow('screen', im)
+		#cv2.imshow('screen', im)
 		# this will break the loop when 'q' is pressed
 		if (cv2.waitKey(1) & 0xFF) == ord('q'):
 			cv2.destroyAllWindows()
