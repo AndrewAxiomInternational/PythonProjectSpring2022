@@ -96,7 +96,7 @@ def main(file_name, starting_value):
 	training_data = []
 	image_rectangle = get_window_location('Grand Theft Auto V')
 
-	for i in list(range(4))[::-1]:wwwwwwwww
+	for i in list(range(4))[::-1]:
 		print(i + 1)
 		time.sleep(1)
 
