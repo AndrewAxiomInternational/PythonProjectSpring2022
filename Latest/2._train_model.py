@@ -1,10 +1,10 @@
-import numpy as np
-import os
-from models import inception_v3 as googlenet
 from random import shuffle
-import tflearn
 
-FILE_I_END = 19
+import numpy as np
+
+from models import inception_v3 as googlenet
+
+FILE_I_END = 8
 
 '''for root, dirs, files in os.walk(os.getcwd()):
     for file in files:
@@ -67,18 +67,6 @@ for e in range(EPOCHS):
             train_data = np.load(file_name, allow_pickle=True)
             print('training_data-{}.npy'.format(i),len(train_data))
 
-##            # [   [    [FRAMES], CHOICE   ]    ] 
-##            train_data = []
-##            current_frames = deque(maxlen=HM_FRAMES)
-##            
-##            for ds in data:
-##                screen, choice = ds
-##                gray_screen = cv2.cvtColor(screen, cv2.COLOR_RGB2GRAY)
-##
-##
-##                current_frames.append(gray_screen)
-##                if len(current_frames) == HM_FRAMES:
-##                    train_data.append([list(current_frames),choice])
 
 
             # #

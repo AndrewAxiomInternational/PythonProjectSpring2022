@@ -1,18 +1,17 @@
+import random
+import time
+from collections import deque
+from statistics import mean
+
+import cv2
 import numpy as np
 from mss import mss
-
-from grabscreen import grab_screen
-import cv2
-import time
-from directkeys import PressKey, ReleaseKey, W, A, S, D
-from Archive.models import inception_v3 as googlenet
-from getkeys import key_check
-from collections import deque, Counter
-import random
-from statistics import mode, mean
-import numpy as np
-from motion import motion_detection
 from win32gui import FindWindow, GetWindowRect
+
+from directkeys import A, D, PressKey, ReleaseKey, S, W
+from getkeys import key_check
+from models import inception_v3 as googlenet
+from motion import motion_detection
 
 GAME_WIDTH = 800
 GAME_HEIGHT = 600
